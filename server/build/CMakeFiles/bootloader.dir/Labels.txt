@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+/Users/stephentownsend/esp/SDP-ESP32/server/build/CMakeFiles/bootloader
+/Users/stephentownsend/esp/SDP-ESP32/server/build/CMakeFiles/bootloader.rule
+/Users/stephentownsend/esp/SDP-ESP32/server/build/CMakeFiles/bootloader-complete.rule
+/Users/stephentownsend/esp/SDP-ESP32/server/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/Users/stephentownsend/esp/SDP-ESP32/server/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/Users/stephentownsend/esp/SDP-ESP32/server/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/Users/stephentownsend/esp/SDP-ESP32/server/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/Users/stephentownsend/esp/SDP-ESP32/server/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/Users/stephentownsend/esp/SDP-ESP32/server/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/Users/stephentownsend/esp/SDP-ESP32/server/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

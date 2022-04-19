@@ -1,0 +1,21 @@
+{
+    "project_name":       "bootloader",
+    "project_path":       "/Users/stephentownsend/esp/esp-idf/components/bootloader/subproject",
+    "build_dir":          "/Users/stephentownsend/esp/SDP-ESP32/server/build/bootloader",
+    "config_file":        "/Users/stephentownsend/esp/SDP-ESP32/server/sdkconfig",
+    "config_defaults":    "",
+    "app_elf":            "bootloader.elf",
+    "app_bin":            "bootloader.bin",
+    "git_revision":       "v4.4-dirty",
+    "target":             "esp32",
+    "rev":                "0",
+    "phy_data_partition": "",
+    "monitor_baud" :      "115200",
+    "monitor_toolprefix": "xtensa-esp32-elf-",
+    "config_environment" : {
+        "COMPONENT_KCONFIGS" : "/Users/stephentownsend/esp/esp-idf/components/efuse/Kconfig;/Users/stephentownsend/esp/esp-idf/components/esp32/Kconfig;/Users/stephentownsend/esp/esp-idf/components/esp_common/Kconfig;/Users/stephentownsend/esp/esp-idf/components/esp_hw_support/Kconfig;/Users/stephentownsend/esp/esp-idf/components/esp_system/Kconfig;/Users/stephentownsend/esp/esp-idf/components/freertos/Kconfig;/Users/stephentownsend/esp/esp-idf/components/hal/Kconfig;/Users/stephentownsend/esp/esp-idf/components/log/Kconfig;/Users/stephentownsend/esp/esp-idf/components/newlib/Kconfig;/Users/stephentownsend/esp/esp-idf/components/spi_flash/Kconfig",
+        "COMPONENT_KCONFIGS_PROJBUILD" : "/Users/stephentownsend/esp/esp-idf/components/bootloader/Kconfig.projbuild;/Users/stephentownsend/esp/esp-idf/components/esp_rom/Kconfig.projbuild;/Users/stephentownsend/esp/esp-idf/components/esptool_py/Kconfig.projbuild;/Users/stephentownsend/esp/esp-idf/components/partition_table/Kconfig.projbuild"
+    },
+    "build_components" : [ "bootloader", "bootloader_support", "efuse", "esp32", "esp_common", "esp_hw_support", "esp_rom", "esp_system", "esptool_py", "freertos", "hal", "log", "main", "micro-ecc", "newlib", "partition_table", "soc", "spi_flash", "xtensa", "" ],
+    "build_component_paths" : [ "/Users/stephentownsend/esp/esp-idf/components/bootloader", "/Users/stephentownsend/esp/esp-idf/components/bootloader_support", "/Users/stephentownsend/esp/esp-idf/components/efuse", "/Users/stephentownsend/esp/esp-idf/components/esp32", "/Users/stephentownsend/esp/esp-idf/components/esp_common", "/Users/stephentownsend/esp/esp-idf/components/esp_hw_support", "/Users/stephentownsend/esp/esp-idf/components/esp_rom", "/Users/stephentownsend/esp/esp-idf/components/esp_system", "/Users/stephentownsend/esp/esp-idf/components/esptool_py", "/Users/stephentownsend/esp/esp-idf/components/freertos", "/Users/stephentownsend/esp/esp-idf/components/hal", "/Users/stephentownsend/esp/esp-idf/components/log", "/Users/stephentownsend/esp/esp-idf/components/bootloader/subproject/main", "/Users/stephentownsend/esp/esp-idf/components/bootloader/subproject/components/micro-ecc", "/Users/stephentownsend/esp/esp-idf/components/newlib", "/Users/stephentownsend/esp/esp-idf/components/partition_table", "/Users/stephentownsend/esp/esp-idf/components/soc", "/Users/stephentownsend/esp/esp-idf/components/spi_flash", "/Users/stephentownsend/esp/esp-idf/components/xtensa", "" ]
+}
