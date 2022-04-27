@@ -3,11 +3,13 @@
 #include "time_control.h"
 #include "pin_control.h"
 #include "constants.h"
+#include "esp_log.h"
 //#include "motor_control.h"
 //#include "delay.h"
 //#include "motor_control.h"
 
 bool calibrated = false;
+
 
 typedef struct calibrationData {
 	int LeftMax;
@@ -98,7 +100,7 @@ void setupPhotoresistors(uint8_t leftLED, uint8_t rightLED, adc1_channel_t leftP
   digitalWrite(LeftLEDPin, 1);
   digitalWrite(RightLEDPin, 1);
 
-  fullCalibration(LeftPhotoResistor, RightPhotoResistor, 9+analogResolution, 5000);
+  fullCalibration(LeftPhotoResistor, RightPhotoResistor, 9+analogResolution, 10000);
 
   // Calibration Done.
   digitalWrite(LeftLEDPin, 0);
@@ -282,7 +284,9 @@ int trackLine(adc1_channel_t LeftPhotoresistorChannel, adc1_channel_t RightPhoto
 	  digitalWrite(movementDirectionPin, 0);
   }
   readRawPhotoCells(LeftPhotoresistorChannel, RightPhotoresistorChannel, photoValues);
+  //ESP_LOGE(TAG, "Left: %d, Right: %d", photoValues->Left_Photo, photoValues->Right_Photo);
   processPhotoCells(photoValues, direction);
+  //ESP_LOGE(TAG, "Photo Cell result: %d, %d\n", (*photoValues).Left_Photo, (*photoValues).Right_Photo);
   //printf("Photo Cell result: %d, %d\n", (*photoValues).Left_Photo, (*photoValues).Right_Photo);
   return handlePhotoCells(photoValues, reverseColor);
   //printf("In Track Line, %d %d", (*photoValues).Left_Photo, (*photoValues).Right_Photo);

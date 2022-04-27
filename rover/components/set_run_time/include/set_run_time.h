@@ -1,7 +1,7 @@
 
 
 
-#define WEB_SERVER "192.168.1.7"
+#define WEB_SERVER "192.168.1.2"
 #define WEB_PORT "80"
 #define WEB_PATH "/time.html"
 

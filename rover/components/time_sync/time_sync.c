@@ -16,6 +16,8 @@
 
 static const char *TAG = "example";
 
+bool first = true;
+
 #ifndef INET6_ADDRSTRLEN
 #define INET6_ADDRSTRLEN 48
 #endif
@@ -33,13 +35,13 @@ void time_sync_notification_cb(struct timeval *tv)
 
 time_t obtain_time(void)
 {
-    ESP_ERROR_CHECK( esp_event_loop_create_default() );
 
-    //ESP_ERROR_CHECK(example_connect());
+    if(first)
+    {
+        initialize_sntp();
+        first = false;
+    }
 
-    initialize_sntp();
-
-    // wait for time to be set
     time_t now = 0;
     struct tm timeinfo = { 0 };
     int retry = 0;
@@ -50,11 +52,6 @@ time_t obtain_time(void)
     }
 
     time(&now);
-
-
-    ESP_ERROR_CHECK( example_disconnect() );
-    ESP_ERROR_CHECK(esp_event_loop_delete_default());
-
 
     return now;
 
@@ -75,34 +72,15 @@ void initialize_sntp(void)
 
 time_t sync_time(void)
 {
-    // ESP_LOGI(TAG, "Boot count: %d", boot_count);
-    
-    
+
     time_t now;
     struct tm timeinfo;
     time(&now);
     localtime_r(&now, &timeinfo);
-    // Is time set? If not, tm_year will be (1970 - 1900).
     now = obtain_time();
-        // update 'now' variable with current time
     setenv("TZ", "EST5EDT,M3.2.0,M11.1.0", 1);
     tzset();
 
     return now;
-    // char strftime_buf[64];
-
-    // // Set timezone to Eastern Standard Time and print local time
-    // setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
-    // tzset();
-    // localtime_r(&now, &timeinfo);
-    // strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-    // ESP_LOGI(TAG, "The current date/time in New York is: %s", strftime_buf);
-
-    // ESP_LOGI(TAG, "Here is the thing: %d", timeinfo.tm_wday);
-
-//     const int deep_sleep_sec = 10;
-//     ESP_LOGI(TAG, "Entering deep sleep for %d seconds", deep_sleep_sec);
-//     esp_deep_sleep(1000000LL * deep_sleep_sec);
-
 }
 

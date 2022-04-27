@@ -19,13 +19,19 @@
 #include "set_run_time.h"
 #include <sys/time.h>
 #include "esp_sleep.h"
+#include "nvs_flash.h"
+#include "protocol_examples_common.h"
+#include "esp_event.h"
 
 bool objectDetected = false;
 bool loadDetected = false;
-bool towards_pickup = true;
+bool towards_pickup;
 bool offline_message_sent = false;
-bool at_pickup = false;
+bool at_pickup;
+
 bool done = false;
+bool went = false;
+
 
 // uint8_t RIGHT_PHOTO = 34;
 // uint8_t LEFT_PHOTO = 39;
@@ -36,10 +42,12 @@ uint8_t ULTRA_DETECTION = 36;
 uint8_t LOAD_DETECTION = 25;
 int motorSpeed = 255;
 uint16_t obstacle_removal_wait_time = 20000; // In ms
-uint16_t load_removal_wait_time = 20000; // In ms
+uint16_t load_removal_wait_time = 60000; // In ms
 
 RTC_DATA_ATTR int boot_count = -1;
 int execution_buffer = 2;
+int temp_day;
+char temp_buf[3];
 
 static const char *TAG = "Trash-E";
 
@@ -102,7 +110,7 @@ bool compare_times(void)
 
 int get_run_time(void)
 {
-    bzero(time_buf, sizeof(time_buf));
+    //bzero(time_buf, sizeof(time_buf));
 
     set_run_time();
 
@@ -110,12 +118,25 @@ int get_run_time(void)
 
     ESP_LOGI(TAG, "Time_Buf Loaded");
 
+
     if(!(isdigit(time_buf[0]) || isdigit(time_buf[1]) || isdigit(time_buf[2])))
     {
         ESP_LOGE(TAG, "User input contain non-numbers");
-        return -1;
     }
-    
+
+	ESP_LOGW(TAG, "%d", strcmp(time_buf, temp_buf));
+
+	if(went && strcmp(time_buf, temp_buf))
+	{
+		ESP_LOGI(TAG, "Time Has Changed");
+		strcpy(temp_buf, time_buf);
+		went = false;
+	}
+
+	else strcpy(temp_buf, time_buf);
+
+	
+
     char hour_str[2];
     bzero(hour_str, sizeof(hour_str));
 
@@ -123,6 +144,7 @@ int get_run_time(void)
     strncat(hour_str, &time_buf[2], 1);
 
     run_time.run_day = time_buf[0] - '0';
+	
     run_time.run_hour = atoi(hour_str);
 
     if(run_time.run_day < 0 || run_time.run_day > 6)
@@ -147,39 +169,6 @@ void run_trashe() {
 		digitalWrite(ULTRA_DIRECTION, 1);
 		objectDetected = digitalRead(ULTRA_DETECTION);
 
-		if(objectDetected)
-		{
-			stop();
-			ESP_LOGI(TAG, "Obstacle Detected");
-			//send_message("obstacle");
-			int startTime = millis();
-			while(objectDetected)
-			{
-				objectDetected = digitalRead(ULTRA_DETECTION);
-				if(millis() - startTime >= load_removal_wait_time)
-				{
-					towards_pickup = false;
-					break;
-				}
-			}
-		}
-
-		while(at_pickup)
-		{
-			// send at pickup message
-			int startTime = millis();
-			while (millis() - startTime < load_removal_wait_time) {
-				loadDetected = digitalRead(LOAD_DETECTION);
-				if (!loadDetected) {
-					break;
-				}
-			}
-
-			at_pickup = false;
-			towards_pickup = false;
-			
-		}
-
 		switch(trackLine(ADC1_CHANNEL_3, ADC1_CHANNEL_6, true, &photoValStruct, towards_pickup))
 		{
 			case 1: // Left side triggered
@@ -201,7 +190,6 @@ void run_trashe() {
 				break;
 			case 3: // At Pickup Location
 				stop();
-				ESP_LOGI(TAG, "At Pickup Location");
 				vTaskDelay(1000 / portTICK_RATE_MS);
 				if (trackLine(ADC1_CHANNEL_3, ADC1_CHANNEL_6, true, &photoValStruct, towards_pickup) == 3) {
 					digitalWrite(RIGHT_LED, 1);
@@ -209,6 +197,7 @@ void run_trashe() {
 					vTaskDelay(500 / portTICK_RATE_MS);
 					digitalWrite(RIGHT_LED, 0);
 					digitalWrite(LEFT_LED, 0);
+					ESP_LOGI(TAG, "At Pickup Location");
 					at_pickup = true;
 					vTaskDelay(3000 / portTICK_RATE_MS);
 				}
@@ -233,6 +222,38 @@ void run_trashe() {
 				vTaskDelay(500 / portTICK_RATE_MS);
 				break;
 		}
+
+		while(at_pickup)
+		{
+			// send at pickup message
+			int startTime = millis();
+			while (millis() - startTime < load_removal_wait_time) {
+				loadDetected = digitalRead(LOAD_DETECTION);
+				if (!loadDetected) {
+					break;
+				}
+			}
+
+			at_pickup = false;
+			towards_pickup = false;
+		}
+
+		if(objectDetected)
+		{
+			stop();
+			ESP_LOGI(TAG, "Obstacle Detected");
+			//send_message("obstacle");
+			int startTime = millis();
+			while(objectDetected)
+			{
+				objectDetected = digitalRead(ULTRA_DETECTION);
+				if(millis() - startTime >= load_removal_wait_time)
+				{
+					towards_pickup = false;
+					break;
+				}
+			}
+		}
 	}
 
 	while(!towards_pickup)
@@ -240,19 +261,10 @@ void run_trashe() {
 		digitalWrite(ULTRA_DIRECTION, 0);
 		objectDetected = digitalRead(ULTRA_DETECTION);
 
-		if(objectDetected)
-		{
-			stop();
-			// send object message 
-			while(objectDetected)
-			{
-				objectDetected = digitalRead(ULTRA_DETECTION);
-			}
-		}
-
-		switch(trackLine(ADC1_CHANNEL_3, ADC1_CHANNEL_6, true, &photoValStruct, towards_pickup))
+		switch(trackLine(ADC1_CHANNEL_3, ADC1_CHANNEL_6, true, &photoValStruct, false))
 		{
 			case 1: // Left side triggered
+				ESP_LOGI(TAG, "Left Side Triggered");
 				digitalWrite(LEFT_LED, 1);
 				stop();
 				vTaskDelay(200/portTICK_RATE_MS);
@@ -261,6 +273,7 @@ void run_trashe() {
 				break;
 
 			case 2: // Right side triggered
+				ESP_LOGI(TAG, "Right Side Triggered");
 				digitalWrite(RIGHT_LED, 1);
 				stop();
 				vTaskDelay(200 / portTICK_RATE_MS);
@@ -268,12 +281,14 @@ void run_trashe() {
 				vTaskDelay(500 / portTICK_RATE_MS);
 				break;
 			case 3:
+				ESP_LOGI(TAG, "At Home");
 				stop();
 				//send done message
 				done = true;
-		
+				return;
 				break;
 			case -1: // Both off the line
+				ESP_LOGI(TAG, "Off the Line");
 				stop();
 				if(!offline_message_sent)
 				{
@@ -284,6 +299,7 @@ void run_trashe() {
 				break;
 
 			default: // Normal Case, Trashe should keep moving towards its destination
+				ESP_LOGI(TAG, "Moving in Reverse");
 				reverse(motorSpeed);
 				digitalWrite(LEFT_LED, 0);
 				digitalWrite(RIGHT_LED, 0);
@@ -292,7 +308,23 @@ void run_trashe() {
 				break;
 		}
 
-		if(done) return;
+		if(objectDetected)
+		{
+			ESP_LOGI(TAG, "Obstacle Detected");
+			stop();
+			// send object message 
+			while(objectDetected)
+			{
+				objectDetected = digitalRead(ULTRA_DETECTION);
+			}
+		}
+
+		if(done)
+		{
+			ESP_LOGI(TAG, "Done");
+			return;
+		}
+		
 
 	}
 }
@@ -301,22 +333,45 @@ bool message_sent = false;
 
 void app_main(void)
 {
-	// get_run_time();
-
-	// bool go = compare_times();
-
-	// if(go)
-	// {
-	// 	send_message("ready");
-	// 	setup();
-	// 	run_trashe();
-	// }
-
-	//send_message("ready");
 	setup();
-	run_trashe();
 
-// 	const int deep_sleep_sec = 20;
+	ESP_ERROR_CHECK(nvs_flash_init() );
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+	
+    ESP_ERROR_CHECK(example_connect());
+
+
+
+
+
+	while(1)
+	{
+
+		ESP_LOGI(TAG, "Top of Loop");
+
+		get_run_time();
+
+		bool go = compare_times();
+
+		if(go && !went)
+		{
+			send_message("ready");
+			ESP_LOGI(TAG, "Running Trash-E");
+			at_pickup = false;
+			towards_pickup = true;
+			run_trashe();
+			went = true;
+			temp_day = run_time.run_day;
+		}
+
+		ESP_LOGI(TAG, "Waiting for Time Update");
+
+
+		wait(5000); // wait 30 seconds
+
+	}
+// 	
 //     ESP_LOGI(TAG, "Entering deep sleep for %d seconds", deep_sleep_sec);
 //     esp_deep_sleep(1000000LL * deep_sleep_sec);
 } 

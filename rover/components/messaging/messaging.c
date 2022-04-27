@@ -6,7 +6,7 @@
 #include "esp_event.h"
 #include "esp_log.h"
 
-#define IP "192.168.1.7"
+#define IP "192.168.1.2"
 
 
 bool message_sent;
@@ -19,7 +19,7 @@ static void obstacle_message(void *pvParameters)
     char local_response_buffer[2048] = {0};
 
     esp_http_client_config_t config = {
-        .host = "192.168.1.2",
+        .host = IP,
         .port = 80,
         .path = "/obstacle/*",
         //.event_handler = _http_event_handler,
@@ -74,9 +74,6 @@ static void ready_message(void *pvParameters)
 
     message_sent = true;
 
-    ESP_ERROR_CHECK(esp_event_loop_delete_default());
-    ESP_ERROR_CHECK(example_disconnect());
-
     vTaskDelete(NULL);
 }
 
@@ -106,9 +103,6 @@ static void offline_message(void *pvParameters)
     esp_http_client_perform(client);
 
     message_sent = true;
-
-    ESP_ERROR_CHECK(esp_event_loop_delete_default());
-    ESP_ERROR_CHECK(example_disconnect());
 
     vTaskDelete(NULL);
 }
@@ -141,19 +135,11 @@ static void pickup_message(void *pvParameters)
 
     message_sent = true;
 
-    ESP_ERROR_CHECK(esp_event_loop_delete_default());
-    ESP_ERROR_CHECK(example_disconnect());
-
     vTaskDelete(NULL);
 }
 
 void send_message(char *message)
 {
-    ESP_ERROR_CHECK(nvs_flash_init());
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    ESP_ERROR_CHECK(example_connect());
-
     if(!strcmp(message, "obstacle")) xTaskCreate(&obstacle_message, "obstacle_message", 8192, NULL, 5, NULL);
     if(!strcmp(message, "ready")) xTaskCreate(&ready_message, "ready_message", 8192, NULL, 5, NULL);
     if(!strcmp(message, "offline")) xTaskCreate(&offline_message, "offline_message", 8192, NULL, 5, NULL);
