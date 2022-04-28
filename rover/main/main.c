@@ -41,8 +41,8 @@ uint8_t ULTRA_DIRECTION = 26;
 uint8_t ULTRA_DETECTION = 36;
 uint8_t LOAD_DETECTION = 25;
 int motorSpeed = 255;
-uint16_t obstacle_removal_wait_time = 20000; // In ms
-uint16_t load_removal_wait_time = 60000; // In ms
+uint16_t obstacle_removal_wait_time = 10000; // In ms
+uint16_t load_removal_wait_time = 5000; // In ms
 
 RTC_DATA_ATTR int boot_count = -1;
 int execution_buffer = 2;
@@ -166,7 +166,7 @@ void run_trashe() {
 
 	while(towards_pickup)
 	{
-		digitalWrite(ULTRA_DIRECTION, 1);
+		//digitalWrite(ULTRA_DIRECTION, 1);
 		objectDetected = digitalRead(ULTRA_DETECTION);
 
 		switch(trackLine(ADC1_CHANNEL_3, ADC1_CHANNEL_6, true, &photoValStruct, towards_pickup))
@@ -242,7 +242,7 @@ void run_trashe() {
 		{
 			stop();
 			ESP_LOGI(TAG, "Obstacle Detected");
-			//send_message("obstacle");
+			send_message("obstacle");
 			int startTime = millis();
 			while(objectDetected)
 			{
@@ -258,7 +258,7 @@ void run_trashe() {
 
 	while(!towards_pickup)
 	{
-		digitalWrite(ULTRA_DIRECTION, 0);
+		//digitalWrite(ULTRA_DIRECTION, 0);
 		objectDetected = digitalRead(ULTRA_DETECTION);
 
 		switch(trackLine(ADC1_CHANNEL_3, ADC1_CHANNEL_6, true, &photoValStruct, false))
@@ -312,7 +312,7 @@ void run_trashe() {
 		{
 			ESP_LOGI(TAG, "Obstacle Detected");
 			stop();
-			// send object message 
+			send_message("obstacle"); 
 			while(objectDetected)
 			{
 				objectDetected = digitalRead(ULTRA_DETECTION);
@@ -341,10 +341,6 @@ void app_main(void)
 	
     ESP_ERROR_CHECK(example_connect());
 
-
-
-
-
 	while(1)
 	{
 
@@ -360,6 +356,7 @@ void app_main(void)
 			ESP_LOGI(TAG, "Running Trash-E");
 			at_pickup = false;
 			towards_pickup = true;
+			done = false;
 			run_trashe();
 			went = true;
 			temp_day = run_time.run_day;

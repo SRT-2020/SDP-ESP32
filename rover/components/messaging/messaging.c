@@ -38,7 +38,7 @@ static void obstacle_message(void *pvParameters)
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     esp_http_client_perform(client);
 
-    message_sent = true;
+    //message_sent = true;
     
     ESP_ERROR_CHECK(esp_event_loop_delete_default());
     ESP_ERROR_CHECK(example_disconnect());
